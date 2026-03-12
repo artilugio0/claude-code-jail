@@ -10,7 +10,7 @@ load 'helpers/setup'
 INT_PROJ=""
 INT_IMAGE=""
 
-setup_file() {
+setup() {
     INT_PROJ="$(mktemp -d)/ccjail-integration-test"
     mkdir -p "$INT_PROJ"
 
@@ -22,15 +22,17 @@ setup_file() {
     sh -c "cd '$INT_PROJ' && bash '$ccjail' init"
     sh -c "cd '$INT_PROJ' && bash '$ccjail' build"
 
+    echo "INT_PROJ: $INT_PROJ"
+
     INT_IMAGE="$(grep '^IMAGE_NAME=' "$INT_PROJ/.ccjail/config" | cut -d= -f2)"
 
     # Export so individual tests can use them.
     export INT_PROJ INT_IMAGE
 }
 
-teardown_file() {
+teardown() {
     if [ -n "$INT_IMAGE" ]; then
-        docker rmi "$INT_IMAGE" 2>/dev/null || true
+        docker rmi --force "$INT_IMAGE" 2>/dev/null || true
     fi
     rm -rf "$(dirname "$INT_PROJ")"
 }

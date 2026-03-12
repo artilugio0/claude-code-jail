@@ -71,12 +71,12 @@ teardown() {
 
 @test "run mounts ~/.claude into the container" {
     ccjail_run run
-    assert_docker_call "-v $HOME/.claude:/home/node/.claude"
+    assert_docker_call "-v $HOME/.claude:/home/user/.claude"
 }
 
 @test "run mounts ~/.claude.json into the container" {
     ccjail_run run
-    assert_docker_call "-v $HOME/.claude.json:/home/node/.claude.json"
+    assert_docker_call "-v $HOME/.claude.json:/home/user/.claude.json"
 }
 
 @test "run sets user to current uid:gid" {
