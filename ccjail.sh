@@ -16,7 +16,10 @@ ccjail — run Claude Code inside a Docker container
 Usage:
   ccjail init [--force]   Scaffold a Dockerfile into the current project
   ccjail build            Build the Docker image for this project
-  ccjail run [ARGS...]    Start Claude Code in the container; ARGS are passed to claude
+  ccjail run [--docker] [ARGS...]
+                          Start Claude Code in the container; ARGS are passed to claude
+                          --allow-docker: mount the host Docker socket (requires Docker
+                                          CLI in the project image; see .ccjail/Dockerfile)
   ccjail help             Show this help message
 
 Getting started:
@@ -92,6 +95,16 @@ cmd_build() {
 }
 
 cmd_run() {
+    # Parse ccjail-specific flags; remaining args are forwarded to claude.
+    mount_docker=0
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --allow-docker) mount_docker=1; shift ;;
+            --) shift; break ;;
+            *) break ;;
+        esac
+    done
+
     if [ ! -f "$CONFIG_FILE" ]; then
         echo "ccjail: '$CONFIG_FILE' not found, running init first..."
         cmd_init
@@ -125,17 +138,31 @@ cmd_run() {
         ssh_flags="-v $SSH_AUTH_SOCK:/ssh-agent -e SSH_AUTH_SOCK=/ssh-agent"
     fi
 
-    # $api_key_flag and $ssh_flags are unquoted intentionally: word-split into flags.
+    docker_flags=""
+    if [ "$mount_docker" -eq 1 ]; then
+        if [ ! -S /var/run/docker.sock ]; then
+            echo "ccjail: --allow-docker requested but /var/run/docker.sock not found" >&2
+            exit 1
+        fi
+        docker_flags="-v /var/run/docker.sock:/var/run/docker.sock \
+            --group-add $(stat -c '%g' /var/run/docker.sock)"
+    fi
+
+    # The project directory is mapped to the same absolute path inside the container so
+    # that sibling docker containers Claude starts can use volume mounts referencing
+    # $(pwd) and have them resolve correctly on the host.
+    # $api_key_flag, $ssh_flags, $docker_flags are unquoted intentionally: word-split into flags.
     # "$@" is quoted: forwards claude args verbatim, including any with spaces.
     # shellcheck disable=SC2086
     exec docker run --rm -it \
-        -v "$(pwd):/workspace" \
+        -v "$(pwd):$(pwd)" \
         -v "$HOME/.claude:/home/node/.claude" \
         -v "$HOME/.claude.json:/home/node/.claude.json" \
         -u "$(id -u):$(id -g)" \
-        -w /workspace \
+        -w "$(pwd)" \
         $api_key_flag \
         $ssh_flags \
+        $docker_flags \
         "$IMAGE_NAME" \
         "$@"
 }
