@@ -93,8 +93,8 @@ cmd_build() {
 
 cmd_run() {
     if [ ! -f "$CONFIG_FILE" ]; then
-        echo "ccjail: '$CONFIG_FILE' not found. Run 'ccjail init' first." >&2
-        exit 1
+        echo "ccjail: '$CONFIG_FILE' not found, running init first..."
+        cmd_init
     fi
 
     # shellcheck source=/dev/null
@@ -103,6 +103,11 @@ cmd_run() {
     if [ -z "$IMAGE_NAME" ]; then
         echo "ccjail: IMAGE_NAME is not set in '$CONFIG_FILE'." >&2
         exit 1
+    fi
+
+    if ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
+        echo "ccjail: image '$IMAGE_NAME' not found, running build first..."
+        cmd_build
     fi
 
     # Ensure .claude and .claude.json exist with correct ownership before mounting.
