@@ -7,7 +7,7 @@ FROM ubuntu:24.04
 ARG USER_UID=1000
 ARG USER_GID=1000
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     git curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
