@@ -156,8 +156,8 @@ cmd_run() {
     # shellcheck disable=SC2086
     exec docker run --rm -it \
         -v "$(pwd):$(pwd)" \
-        -v "$HOME/.claude:/home/node/.claude" \
-        -v "$HOME/.claude.json:/home/node/.claude.json" \
+        -v "$HOME/.claude:/home/user/.claude" \
+        -v "$HOME/.claude.json:/home/user/.claude.json" \
         -u "$(id -u):$(id -g)" \
         -w "$(pwd)" \
         $api_key_flag \
