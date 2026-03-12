@@ -13,9 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN npm install -g @anthropic-ai/claude-code
 
 # Match container user UID/GID to host user to avoid file permission issues.
-# The node image ships with a "node" user — we reuse it.
-RUN groupmod -g ${USER_GID} node \
-    && usermod -u ${USER_UID} -g ${USER_GID} node
+RUN usermod -u ${USER_UID} -g ${USER_GID} node
 
 USER node
 WORKDIR /workspace
