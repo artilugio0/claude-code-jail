@@ -105,11 +105,16 @@ cmd_run() {
         exit 1
     fi
 
+    # Ensure .claude and .claude.json exist with correct ownership before mounting.
+    [ -d "$HOME/.claude" ]      || mkdir -p "$HOME/.claude"
+    [ -f "$HOME/.claude.json" ] || touch "$HOME/.claude.json"
+
     # Base arguments
     set -- \
         run --rm -it \
         -v "$(pwd):/workspace" \
         -v "$HOME/.claude:/home/node/.claude" \
+        -v "$HOME/.claude.json:/home/node/.claude.json" \
         -u "$(id -u):$(id -g)" \
         -w /workspace
 

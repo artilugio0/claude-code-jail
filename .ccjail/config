@@ -1,0 +1,2 @@
+# ccjail configuration — edit IMAGE_NAME to change the Docker image tag
+IMAGE_NAME=ccjail-claude-code-jail
