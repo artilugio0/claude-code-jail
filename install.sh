@@ -2,7 +2,7 @@
 # Installs ccjail to ~/.local/bin
 set -e
 
-REPO_URL="https://raw.githubusercontent.com/artilugio0/ccjail/main"
+REPO_URL="https://raw.githubusercontent.com/artilugio0/claude-code-jail/main"
 INSTALL_DIR="${HOME}/.local/bin"
 TEMPLATES_DIR="${HOME}/.local/share/ccjail/templates"
 

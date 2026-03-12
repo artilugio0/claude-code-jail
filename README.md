@@ -18,13 +18,13 @@ Run [Claude Code](https://claude.ai/claude-code) inside a Docker container for a
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/artilugio0/ccjail/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/artilugio0/claude-code-jail/main/install.sh | sh
 ```
 
 Or manually:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/artilugio0/ccjail/main/ccjail.sh -o ~/.local/bin/ccjail
+curl -fsSL https://raw.githubusercontent.com/artilugio0/claude-code-jail/main/ccjail.sh -o ~/.local/bin/ccjail
 chmod +x ~/.local/bin/ccjail
 ```
 
