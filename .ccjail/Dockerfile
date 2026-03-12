@@ -12,6 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Claude Code
 RUN npm install -g @anthropic-ai/claude-code
 
+# Uncomment to enable Docker support (required for 'ccjail run --allow-docker'):
+RUN apt-get update && apt-get install -y --no-install-recommends docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
 # Match container user UID/GID to host user to avoid file permission issues.
 RUN usermod -u ${USER_UID} -g ${USER_GID} node
 
