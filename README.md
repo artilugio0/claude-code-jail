@@ -60,7 +60,7 @@ Starts Claude Code interactively. The following are mounted/forwarded automatica
 | What | Host | Container |
 |------|------|-----------|
 | Project files | `$PWD` | `/workspace` |
-| Claude config & auth | `~/.claude` | `/home/node/.claude` |
+| Claude config & auth | `~/.claude` | `/home/user/.claude` |
 | API key (if set) | `$ANTHROPIC_API_KEY` | `$ANTHROPIC_API_KEY` |
 | SSH agent (if running) | `$SSH_AUTH_SOCK` | `/ssh-agent` |
 
@@ -69,7 +69,7 @@ Starts Claude Code interactively. The following are mounted/forwarded automatica
 After running `ccjail init`, edit `.ccjail/Dockerfile` to add tools your project needs:
 
 ```dockerfile
-FROM node:lts-slim
+FROM ubuntu:24.04
 
 ARG USER_UID=1000
 ARG USER_GID=1000
@@ -86,7 +86,7 @@ Then rebuild with `ccjail build`.
 
 ## Authentication
 
-ccjail mounts `~/.claude` from your host, so any existing Claude Code authentication is available inside the container. If you use an API key directly, set `ANTHROPIC_API_KEY` in your environment before running `ccjail run`.
+ccjail mounts `~/.claude` and `~/.claude.json` from your host, so any existing Claude Code authentication is available inside the container. If you use an API key directly, set `ANTHROPIC_API_KEY` in your environment before running `ccjail run`.
 
 ## Committing `.ccjail/`
 
