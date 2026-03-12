@@ -16,7 +16,7 @@ ccjail — run Claude Code inside a Docker container
 Usage:
   ccjail init [--force]   Scaffold a Dockerfile into the current project
   ccjail build            Build the Docker image for this project
-  ccjail run              Start Claude Code in the container
+  ccjail run [ARGS...]    Start Claude Code in the container; ARGS are passed to claude
   ccjail help             Show this help message
 
 Getting started:
@@ -109,37 +109,37 @@ cmd_run() {
     [ -d "$HOME/.claude" ]      || mkdir -p "$HOME/.claude"
     [ -f "$HOME/.claude.json" ] || touch "$HOME/.claude.json"
 
-    # Base arguments
-    set -- \
-        run --rm -it \
+    # Build optional flag groups into variables for clarity.
+    api_key_flag=""
+    if [ -n "$ANTHROPIC_API_KEY" ]; then
+        api_key_flag="-e ANTHROPIC_API_KEY"
+    fi
+
+    ssh_flags=""
+    if [ -n "$SSH_AUTH_SOCK" ] && [ -S "$SSH_AUTH_SOCK" ]; then
+        ssh_flags="-v $SSH_AUTH_SOCK:/ssh-agent -e SSH_AUTH_SOCK=/ssh-agent"
+    fi
+
+    # $api_key_flag and $ssh_flags are unquoted intentionally: word-split into flags.
+    # "$@" is quoted: forwards claude args verbatim, including any with spaces.
+    # shellcheck disable=SC2086
+    exec docker run --rm -it \
         -v "$(pwd):/workspace" \
         -v "$HOME/.claude:/home/node/.claude" \
         -v "$HOME/.claude.json:/home/node/.claude.json" \
         -u "$(id -u):$(id -g)" \
-        -w /workspace
-
-    # Pass through API key if set
-    if [ -n "$ANTHROPIC_API_KEY" ]; then
-        set -- "$@" -e ANTHROPIC_API_KEY
-    fi
-
-    # Pass through SSH agent socket if available
-    if [ -n "$SSH_AUTH_SOCK" ] && [ -S "$SSH_AUTH_SOCK" ]; then
-        set -- "$@" \
-            -v "$SSH_AUTH_SOCK:/ssh-agent" \
-            -e SSH_AUTH_SOCK=/ssh-agent
-    fi
-
-    set -- "$@" "$IMAGE_NAME"
-
-    exec docker "$@"
+        -w /workspace \
+        $api_key_flag \
+        $ssh_flags \
+        "$IMAGE_NAME" \
+        "$@"
 }
 
 # Entry point
 case "${1:-}" in
     init)    shift; cmd_init "$@" ;;
     build)   cmd_build ;;
-    run)     cmd_run ;;
+    run)     shift; cmd_run "$@" ;;
     help|--help|-h) usage ;;
     "")      usage; exit 1 ;;
     *)       echo "ccjail: unknown command: $1" >&2; echo "Run 'ccjail help' for usage." >&2; exit 1 ;;
